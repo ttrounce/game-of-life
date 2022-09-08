@@ -1,0 +1,27 @@
+#version 460 core
+
+layout(local_size_x = 8, local_size_y = 4, local_size_z = 1) in;
+layout(rgba32f, binding=0) uniform image2D screen_image;
+layout(rgba32f, binding=1) uniform image2D screen_image_out;
+
+void main()
+{
+	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+
+	int neighbours = 0;
+    neighbours += int(imageLoad(screen_image, pixel_coords + ivec2(-1, -1)).r == 1);
+    neighbours += int(imageLoad(screen_image, pixel_coords + ivec2(+0, -1)).r == 1);
+    neighbours += int(imageLoad(screen_image, pixel_coords + ivec2(+1, -1)).r == 1);
+    neighbours += int(imageLoad(screen_image, pixel_coords + ivec2(-1, +0)).r == 1);
+    neighbours += int(imageLoad(screen_image, pixel_coords + ivec2(+1, +0)).r == 1);
+    neighbours += int(imageLoad(screen_image, pixel_coords + ivec2(-1, +1)).r == 1);
+    neighbours += int(imageLoad(screen_image, pixel_coords + ivec2(+0, +1)).r == 1);
+    neighbours += int(imageLoad(screen_image, pixel_coords + ivec2(+1, +1)).r == 1);
+
+    vec4 last_pixel_state = imageLoad(screen_image, pixel_coords);
+	vec4 next_pixel_state = vec4(1.0);
+
+	next_pixel_state *= last_pixel_state.r * max(1 - abs(neighbours - 2), 0) + max(1 - abs(neighbours - 3), 0);
+
+	imageStore(screen_image_out, pixel_coords, next_pixel_state);
+}
