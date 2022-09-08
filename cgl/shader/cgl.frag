@@ -8,5 +8,5 @@ out vec4 frag_color;
 
 void main()
 {
-	frag_color = texture(screen_image, p_uv);
+    frag_color = texture(screen_image, p_uv);
 }
